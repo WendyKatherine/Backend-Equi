@@ -162,7 +162,14 @@ export const deleteArticle = async (req, res) => {
     try {
         const articleId = req.params.id;
 
-        const articleDeleted = await Article.findOneAndDelete({ articleId });
+        const articleDeleted = await Article.findOneAndDelete({ _id: articleId });
+
+        if (!articleDeleted) {
+            return res.status(404).json({
+                status: "error",
+                message: "Artículo no encontrado"
+            });
+        }
 
         // Devolvemos respuesta exitosa
         return res.status(200).json({

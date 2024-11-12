@@ -169,7 +169,14 @@ export const deleteAuthor = async (req, res) => {
     try {
         const authorId = req.params.id;
 
-        const authorDeleted = await Author.findOneAndDelete({ authorId });
+        const authorDeleted = await Author.findOneAndDelete({ _id: authorId });
+
+        if (!authorDeleted) {
+            return res.status(404).json({
+                status: "error",
+                message: "Autor no encontrado"
+            });
+        }
 
         // Devolvemos respuesta exitosa
         return res.status(200).json({
