@@ -4,6 +4,8 @@ import connection from "./database/connection.js";
 import cors from "cors";
 import bodyParser from "body-parser";
 import UserRoutes from "./routes/users.js";
+import AuthorRoutes from "./routes/authors.js";
+import ArticleRoutes from "./routes/articles.js";
 
 console.log("API Node Equi en ejecución");
 
@@ -27,8 +29,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Configurar rutas del aplicativo (módulos)
 app.use('/api/user', UserRoutes);
-// app.use('/api/publication', PublicationRoutes);
-// app.use('/api/follow', FollowRoutes);
+app.use('/api/author', AuthorRoutes);
+app.use('/api/article', ArticleRoutes);
 
 // Configurar el servidor de Node
 app.listen(puerto, () => {
