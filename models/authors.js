@@ -17,6 +17,14 @@ const AuthorSchema =    Schema({
         type: String,
         required: true
     },
+    image: {
+        type: String,
+        default: "default_user.png"
+    },
+    created_at: {
+        type: Date,
+        default: Date.now
+    }
 });
 
 // Configurar plugin de paginación

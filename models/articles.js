@@ -16,6 +16,10 @@ const ArticleSchema = Schema ({
     summary: {
         type: String,
     },
+    image: {
+        type: String,
+        default: "default_user.png"
+    },
     status: {
         type: String,
     },

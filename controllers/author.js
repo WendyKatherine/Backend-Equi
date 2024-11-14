@@ -55,6 +55,51 @@ export const saveAuthor = async (req, res) => {
     }
 };
 
+//Metodo para subir la imagen
+export const uploadImage = async (req, res) => {
+
+    var authorId = req.params.id;
+    var fileName = 'Imagen no subida';
+  
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'No se ha subido ninguna imagen'
+        });
+      }
+  
+      // Actualizar el autor con la ruta de la imagen
+      const updatedAuthor = await Author.findByIdAndUpdate(
+        authorId,
+        { image: req.file.path }, // Actualizar el campo image con la ruta de la imagen
+        { new: true } // Esto devuelve el documento actualizado
+      );
+  
+      if (!updatedAuthor) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'autor no encontrado'
+        });
+      }
+  
+      // Responder con la información del autor actualizado
+      return res.status(200).json({
+        status: 'success',
+        message: 'Imagen subida y asociada correctamente',
+        author: {
+            image: updatedAuthor.image
+        }
+      });
+    } catch (error) {
+      console.log('Error al subir la imagen: ', error);
+          return res.status(500).json({
+              status: 'error',
+              message: 'Hubo un problema al subir la imagen',
+      });
+    }
+  };
+
 //Metodo para mostrar el perfil del autor
 export const getAuthorProfile = async (req, res) => {
     try {
@@ -66,7 +111,7 @@ export const getAuthorProfile = async (req, res) => {
     // Verificar si el Autor buscado no existe
     if(!authorProfile){
         return res.status(404).send({
-          status: "success",
+          status: "error",
           message: "Autor no encontrado"
         });
     }
@@ -80,7 +125,7 @@ export const getAuthorProfile = async (req, res) => {
     console.log("Error al obtener el perfil del autor: ", error);
     return res.status(500).send({
       status: "error",
-      message: "Error al obtener el perfil del usuario"
+      message: "Error al obtener el perfil del autor"
     });
     }
 };

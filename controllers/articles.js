@@ -48,6 +48,52 @@ export const saveArticle = async (req, res) => {
     }
 };
 
+//Metodo para subir la imagen
+export const uploadImage = async (req, res) => {
+
+    var articleId = req.params.id;
+    var fileName = 'Imagen no subida';
+  
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'No se ha subido ninguna imagen'
+        });
+      }
+  
+      // Actualizar el articulo con la ruta de la imagen
+      const updatedArticle = await Article.findByIdAndUpdate(
+        articleId,
+        { image: req.file.path }, // Actualizar el campo image con la ruta de la imagen
+        { new: true } // Esto devuelve el documento actualizado
+      );
+  
+      if (!updatedArticle) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'articulo no encontrado'
+        });
+      }
+  
+      // Responder con la información del articulo actualizado
+      return res.status(200).json({
+        status: 'success',
+        message: 'Imagen subida y asociada correctamente',
+        article: {
+            image: updatedArticle.image
+        }
+      });
+    } catch (error) {
+      console.log('Error al subir la imagen: ', error);
+          return res.status(500).json({
+              status: 'error',
+              message: 'Hubo un problema al subir la imagen',
+      });
+    }
+  };
+
+
 //Metodo para mostrar articulo
 export const getArticle = async (req, res) => {
     try {
