@@ -1,4 +1,6 @@
 import Author from '../models/authors.js';
+import fs from 'fs';
+import path from 'path';
 
 //Metodo de prueba Author
 export const testAuthor = (req, res) => {
@@ -55,49 +57,71 @@ export const saveAuthor = async (req, res) => {
     }
 };
 
-//Metodo para subir la imagen
-export const uploadImage = async (req, res) => {
+//Metodo guardar imagen del autor
+export const uploadImageAuthor = async (req, res) => {
+  const authorId = req.params.id;
 
-    var authorId = req.params.id;
-    var fileName = 'Imagen no subida';
-  
-    try {
-      if (!req.file) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'No se ha subido ninguna imagen'
-        });
+  if (!req.files || !req.files.image) {
+      return res.status(400).send({
+          message: "No se ha subido ninguna imagen",
+      });
+  }
+
+  try {
+      const filePath = req.files.image.path; // Ruta completa del archivo
+      const fileName = path.basename(filePath); // Solo el nombre del archivo
+      const fileExt = path.extname(fileName).toLowerCase(); // Extensión del archivo
+
+      // Validar extensiones permitidas
+      const validExtensions = ['.png', '.jpg', '.jpeg', '.gif'];
+      if (!validExtensions.includes(fileExt)) {
+          // Eliminar archivo si la extensión no es válida
+          fs.unlink(filePath, (err) => {
+              if (err) {
+                  console.error("Error eliminando archivo:", err);
+              }
+          });
+          return res.status(400).send({ message: "La extensión no es válida" });
       }
-  
-      // Actualizar el autor con la ruta de la imagen
-      const updatedAuthor = await Author.findByIdAndUpdate(
-        authorId,
-        { image: req.file.path }, // Actualizar el campo image con la ruta de la imagen
-        { new: true } // Esto devuelve el documento actualizado
+
+      // Actualizar el autor con el nombre del archivo
+      const authorUpdated = await Author.findByIdAndUpdate(
+          authorId,
+          { image: fileName }, // Guardar solo el nombre del archivo
+          { new: true }
       );
-  
-      if (!updatedAuthor) {
-        return res.status(404).json({
-          status: 'error',
-          message: 'autor no encontrado'
-        });
+
+      if (!authorUpdated) {
+          return res.status(404).send({ message: "El au no existe" });
       }
+
+      return res.status(200).send({
+          status: "success",
+          author: authorUpdated,
+      });
+
+  } catch (error) {
+      console.error("Error al subir la imagen:", error);
+      return res.status(500).send({
+          message: "Error al subir la imagen",
+          error,
+      });
+  }
+};
+
+export const getImageFile = async (req, res) => {
+    const file = req.params.image;
+    const path_file = path.resolve('./uploads/', file); // Usa path.resolve para generar la ruta absoluta
   
-      // Responder con la información del autor actualizado
-      return res.status(200).json({
-        status: 'success',
-        message: 'Imagen subida y asociada correctamente',
-        author: {
-            image: updatedAuthor.image
+    fs.access(path_file, fs.constants.F_OK, (err) => {
+        if (!err) {
+            return res.sendFile(path_file); // Enviar el archivo si existe
+        } else {
+            return res.status(404).send({
+                message: "No existe la imagen.",
+            });
         }
-      });
-    } catch (error) {
-      console.log('Error al subir la imagen: ', error);
-          return res.status(500).json({
-              status: 'error',
-              message: 'Hubo un problema al subir la imagen',
-      });
-    }
+    });
   };
 
 //Metodo para mostrar el perfil del autor
@@ -105,7 +129,7 @@ export const getAuthorProfile = async (req, res) => {
     try {
     const authorId = req.params.id;
 
-    // Buscar el usuario en la BD y excluimos los datos que no queremos mostrar
+    // Buscar el autor en la BD y excluimos los datos que no queremos mostrar
     const authorProfile = await Author.findById(authorId).select();
 
     // Verificar si el Autor buscado no existe
@@ -137,7 +161,7 @@ export const listAuthors = async (req, res) => {
         //1. Controlar la paginacion actual
         let page = req.params.page ? parseInt(req.params.page, 10) : 1;
         //2. Configurar los items por pagina a mostrar
-        let itemsPerPage = req.query.limit ? parseInt(req.query.limit, 10) : 4;
+        let itemsPerPage = req.query.limit ? parseInt(req.query.limit, 8) : 8;
         //Realizar la consulta paginada
 
         const options = {

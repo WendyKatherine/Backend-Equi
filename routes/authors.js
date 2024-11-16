@@ -1,15 +1,17 @@
 import { Router } from "express";
-import { testAuthor, saveAuthor, uploadImage, getAuthorProfile, listAuthors, updateAuthor, deleteAuthor } from "../controllers/author.js";
+import { testAuthor, saveAuthor, getAuthorProfile, listAuthors, uploadImageAuthor, updateAuthor, deleteAuthor } from "../controllers/author.js";
 import { ensureAuth } from "../middlewares/auth.js";
-import upload from "../middlewares/upload.js";
+import connectMultiparty from "connect-multiparty";
 
 const router =  Router();
 
+const multipartMiddleware = connectMultiparty({ uploadDir: "./uploads" });
+
 router.get('/test-author', ensureAuth, testAuthor);
 router.post('/save-author', ensureAuth, saveAuthor);
-router.post('/upload-image-author/:id', ensureAuth, upload.single('image'), uploadImage);
 router.get('/profile/:id', ensureAuth, getAuthorProfile);
 router.get('/list-author/:page?', ensureAuth, listAuthors);
+router.post('/upload-imageauthor/:id', ensureAuth, multipartMiddleware, uploadImageAuthor);
 router.put('/update-author/:id', ensureAuth, updateAuthor);
 router.delete('/delete-author/:id', ensureAuth, deleteAuthor);
 

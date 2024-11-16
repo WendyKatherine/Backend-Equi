@@ -1,0 +1,8 @@
+
+> backend-equi@1.0.0 start
+> node index.js
+
+API Node Equi en ejecución
+Servidor de Node en el puerto 3900
+Conectado correctamente a Equinoccio DB
+Terminate batch job (Y/N)? 
